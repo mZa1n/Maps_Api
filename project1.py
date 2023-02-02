@@ -1,9 +1,8 @@
 import os
 import sys
-
 import requests
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QLineEdit
 
 SCREEN_SIZE = [600, 600]
 
@@ -11,8 +10,11 @@ SCREEN_SIZE = [600, 600]
 class Example(QWidget):
     def __init__(self):
         super().__init__()
-        self.y = '0'
-        self.x = '0'
+        self.image = QLabel(self)
+        self.image.move(0, 0)
+        self.image.resize(600, 450)
+        self.x = 55.703118
+        self.y = 37.530887
         self.getImage()
         self.initUI()
 
@@ -22,19 +24,17 @@ class Example(QWidget):
         self.map_file = "map.png"
         with open(self.map_file, "wb") as file:
             file.write(response.content)
+
+        self.pixmap = QPixmap(self.map_file)
+        self.image.setPixmap(self.pixmap)
         self.update()
 
-    def update(self):
-        self.pixmap = QPixmap(self.map_file)
-        self.image = QLabel(self)
-        self.image.move(0, 0)
-        self.image.resize(600, 450)
-        self.image.setPixmap(self.pixmap)
-
     def initUI(self):
-        self.setGeometry(750, 250, *SCREEN_SIZE)
+        self.setGeometry(100, 100, *SCREEN_SIZE)
         self.setWindowTitle('Отображение карты')
-
+        self.btn_start = QPushButton('Start', self)
+        self.btn_start.move(230, 560)
+        self.btn_start.clicked.connect(self.render)
         self.coordsx = QLineEdit(self)
         self.coordsx.move(50, 500)
         self.coordsx.resize(200, 50)
@@ -45,18 +45,15 @@ class Example(QWidget):
         self.label_x.move(80, 480)
         self.label_y = QLabel('Координаты Y', self)
         self.label_y.move(330, 480)
-        self.btn_start = QPushButton('Start', self)
-        self.btn_start.move(230, 560)
-        self.btn_start.clicked.connect(self.render)
 
-    def render(self):
-        self.x = self.coordsx.text()
-        self.y = self.coordsy.text()
-        self.pixmap = None
-        self.getImage()
 
     def closeEvent(self, event):
         os.remove(self.map_file)
+
+    def render(self):
+        self.x = float(self.coordsx.text())
+        self.y = float(self.coordsy.text())
+        self.getImage()
 
 
 if __name__ == '__main__':
